@@ -1,0 +1,144 @@
+package application;
+
+import org.junit.Before;
+import org.junit.After;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Simplified JUnit tests for QuestionManager using a mock database.
+ * Includes 5 main tests: add, get, search, update, and delete.
+ */
+public class QuestionManagerTests {
+
+    private MockDatabaseHelper db;
+    private QuestionManager manager;
+    private String username;
+
+    @Before
+    public void setUp() {
+        System.out.println("Setting up test environment...");
+        db = new MockDatabaseHelper();
+        username = "Alex";
+        manager = new QuestionManager(db, username);
+    }
+
+    @After
+    public void tearDown() {
+        System.out.println("Cleaning up after test...");
+    }
+
+    // ---------- TEST 1: ADD QUESTION ----------
+    @Test
+    public void testAddQuestion_Success() {
+        Question q = new Question("What is Java?", "Explain Java basics.", username);
+        manager.addQuestion(q);
+
+        ArrayList<Question> all = manager.getAllQuestions();
+        assertEquals(1, all.size());
+        assertEquals("What is Java?", all.get(0).getTitle());
+        assertEquals("Explain Java basics.", all.get(0).getBody());
+        assertEquals(username, all.get(0).getAuthor());
+    }
+
+    // ---------- TEST 2: GET ALL QUESTIONS ----------
+    @Test
+    public void testGetAllQuestions_ReturnsAll() {
+        manager.addQuestion(new Question("Q1", "Body1", username));
+        manager.addQuestion(new Question("Q2", "Body2", username));
+        manager.addQuestion(new Question("Q3", "Body3", username));
+
+        ArrayList<Question> all = manager.getAllQuestions();
+        assertEquals(3, all.size());
+    }
+
+    // ---------- TEST 3: SEARCH QUESTIONS ----------
+    @Test
+    public void testSearch_FindsMatchingQuestions() {
+        manager.addQuestion(new Question("Java Basics", "How to start Java?", username));
+        manager.addQuestion(new Question("Python Loops", "Explain loops.", username));
+        manager.addQuestion(new Question("Advanced Java Streams", "Using streams", username));
+
+        ArrayList<Question> results = manager.search("java");
+
+        assertEquals(2, results.size());
+        ArrayList<String> titles = new ArrayList<>();
+        for (Question q : results) titles.add(q.getTitle());
+
+        assertTrue(titles.contains("Java Basics"));
+        assertTrue(titles.contains("Advanced Java Streams"));
+    }
+
+    // ---------- TEST 4: UPDATE QUESTION TITLE ----------
+    @Test
+    public void testUpdateQuestionTitle_UpdatesCorrectly() {
+        manager.addQuestion(new Question("Old Title", "Body text", username));
+        manager.updateQuestionTitle("Old Title", "New Title");
+
+        ArrayList<Question> all = manager.getAllQuestions();
+        boolean foundNew = all.stream().anyMatch(q -> q.getTitle().equals("New Title"));
+        assertTrue("Updated title should be found", foundNew);
+    }
+
+    // ---------- TEST 5: DELETE QUESTION ----------
+    @Test
+    public void testDeleteQuestion_RemovesFromDatabase() {
+        manager.addQuestion(new Question("Q1", "Body1", username));
+        manager.addQuestion(new Question("Q2", "Body2", username));
+
+        manager.deleteQuestion("Q1");
+
+        ArrayList<Question> all = manager.getAllQuestions();
+        assertEquals(1, all.size());
+        assertEquals("Q2", all.get(0).getTitle());
+    }
+
+    // ---------- MOCK DATABASE ----------
+    private static class MockDatabaseHelper extends databasePart1.DatabaseHelper {
+        private final List<String[]> questions = new ArrayList<>();
+        private int qidCounter = 1;
+
+        @Override
+        public boolean addQuestion(String username, String title, String body) {
+            questions.add(new String[]{String.valueOf(qidCounter++), username, title, body});
+            return true;
+        }
+
+        @Override
+        public List<String[]> getAllQuestions() {
+            return new ArrayList<>(questions);
+        }
+
+        @Override
+        public List<String[]> searchQuestions(String keyword) {
+            List<String[]> results = new ArrayList<>();
+            for (String[] q : questions) {
+                if (q[2].toLowerCase().contains(keyword.toLowerCase()) ||
+                    q[3].toLowerCase().contains(keyword.toLowerCase())) {
+                    results.add(q);
+                }
+            }
+            return results;
+        }
+
+        @Override
+        public boolean updateQuestion(int qid, String newTitle, String body) {
+            for (String[] q : questions) {
+                if (Integer.parseInt(q[0]) == qid) {
+                    q[2] = newTitle;
+                    q[3] = body;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public boolean deleteQuestion(int qid) {
+            return questions.removeIf(q -> Integer.parseInt(q[0]) == qid);
+        }
+    }
+}
