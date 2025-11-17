@@ -1,0 +1,43 @@
+package application;
+
+import databasePart1.DatabaseHelper;
+import java.util.ArrayList;
+import java.util.List;
+
+public class ReviewerRequestManager {
+
+    private DatabaseHelper db;
+
+    public ReviewerRequestManager(DatabaseHelper db) {
+        this.db = db;
+    }
+
+    public boolean submitRequest(String username) {
+        return db.submitReviewerRequest(username);
+    }
+
+    public List<ReviewerRequest> getPendingRequests() {
+        List<String[]> rows = db.getPendingReviewerRequests();
+        List<ReviewerRequest> list = new ArrayList<>();
+        for (String[] r : rows) {
+            list.add(new ReviewerRequest(
+                Integer.parseInt(r[0]),
+                r[1],
+                r[2]
+            ));
+        }
+        return list;
+    }
+
+    public boolean approveRequest(int id, String username) {
+        return db.approveReviewerRequest(id, username);
+    }
+
+    public boolean denyRequest(int id) {
+        return db.denyReviewerRequest(id);
+    }
+
+    public List<String[]> getReviewerHistory(String reviewer) {
+        return db.getAnswersByAuthor(reviewer);
+    }
+}
