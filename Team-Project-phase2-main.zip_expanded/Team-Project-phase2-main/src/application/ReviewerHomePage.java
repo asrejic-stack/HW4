@@ -8,7 +8,7 @@ import databasePart1.DatabaseHelper;
 
 /**
  * The ReviewerHomePage class represents the home page for a reviewer user.
- * It displays a simple interface showing the reviewer's username and basic layout.
+ * It displays a simple interfaceoiji showing the reviewer's username and basic layout.
  */
 public class ReviewerHomePage {
 
