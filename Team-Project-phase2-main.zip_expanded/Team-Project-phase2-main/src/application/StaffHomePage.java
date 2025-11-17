@@ -8,7 +8,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 /**
- * The StaffHomePage class represents the home interface for staff or instructors.
+ * The StaffHomePage class reprdsadsadesents the home interface for staff or instructors.
  * It provides navigation options for staff users, such as accessing the Q&A portal
  * or logging out of the application.
  */
